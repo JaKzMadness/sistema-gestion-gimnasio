@@ -22,3 +22,4 @@ export const usuariosService = {
     api.put<Usuario>(`/usuarios/${id}`, data),
   remove: (id: number) => api.delete<void>(`/usuarios/${id}`),
 };
+export {};
