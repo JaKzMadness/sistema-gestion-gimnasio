@@ -1,12 +1,11 @@
-#Dependecias
+# Dependencias
 node_modules/
 
-#Variables de entorno
-
+# Variables de entorno
 .env
 .env.local
 
-#Build Outputs
+# Build outputs
 dist/
 .next/
 
