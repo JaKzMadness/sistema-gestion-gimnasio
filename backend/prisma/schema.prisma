@@ -1,0 +1,160 @@
+// ============================================================
+// Prisma Schema — Sistema de Gestión de Gimnasio
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENTIDAD: PlanMembresia
+// ============================================================
+model PlanMembresia {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  tipo        String    // mensual, trimestral, anual
+  precio      Float
+  beneficios  String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  miembros    Miembro[]
+
+  @@map("planes_membresia")
+}
+
+// ============================================================
+// ENTIDAD: Miembro
+// ============================================================
+model Miembro {
+  id                Int           @id @default(autoincrement())
+  nombres           String
+  apellidos         String
+  documento         String        @unique
+  correo            String        @unique
+  telefono          String?
+  fechaNacimiento   DateTime
+  fechaInicio       DateTime
+  planMembresiaId   Int
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  planMembresia     PlanMembresia @relation(fields: [planMembresiaId], references: [id])
+  rutinas           Rutina[]
+  medidas           MedidaCorporal[]
+
+  @@map("miembros")
+}
+
+// ============================================================
+// ENTIDAD: Entrenador
+// ============================================================
+model Entrenador {
+  id            Int       @id @default(autoincrement())
+  nombres       String
+  apellidos     String
+  documento     String    @unique
+  especialidad  String
+  correo        String    @unique
+  telefono      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  horarios      HorarioEntrenador[]
+  rutinas       Rutina[]
+
+  @@map("entrenadores")
+}
+
+// ============================================================
+// ENTIDAD: HorarioEntrenador
+// ============================================================
+model HorarioEntrenador {
+  id            Int        @id @default(autoincrement())
+  entrenadorId  Int
+  diaSemana     String     // lunes, martes, etc.
+  horaInicio    String
+  horaFin       String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  entrenador    Entrenador @relation(fields: [entrenadorId], references: [id])
+
+  @@map("horarios_entrenador")
+}
+
+// ============================================================
+// ENTIDAD: Rutina
+// ============================================================
+model Rutina {
+  id            Int        @id @default(autoincrement())
+  nombre        String
+  descripcion   String?
+  miembroId     Int
+  entrenadorId  Int
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  miembro       Miembro    @relation(fields: [miembroId], references: [id])
+  entrenador    Entrenador @relation(fields: [entrenadorId], references: [id])
+  ejercicios    RutinaEjercicio[]
+
+  @@map("rutinas")
+}
+
+// ============================================================
+// ENTIDAD: Ejercicio
+// ============================================================
+model Ejercicio {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  grupoMuscular String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  rutinas     RutinaEjercicio[]
+
+  @@map("ejercicios")
+}
+
+// ============================================================
+// ENTIDAD: RutinaEjercicio (tabla intermedia)
+// ============================================================
+model RutinaEjercicio {
+  id          Int       @id @default(autoincrement())
+  rutinaId    Int
+  ejercicioId Int
+  series      Int
+  repeticiones Int
+  descansoSeg Int?
+  createdAt   DateTime  @default(now())
+
+  rutina      Rutina    @relation(fields: [rutinaId], references: [id])
+  ejercicio   Ejercicio @relation(fields: [ejercicioId], references: [id])
+
+  @@map("rutina_ejercicios")
+}
+
+// ============================================================
+// ENTIDAD: MedidaCorporal
+// ============================================================
+model MedidaCorporal {
+  id                Int      @id @default(autoincrement())
+  miembroId         Int
+  fecha             DateTime @default(now())
+  peso              Float
+  talla             Float
+  porcentajeGrasa   Float?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  miembro           Miembro  @relation(fields: [miembroId], references: [id])
+
+  @@map("medidas_corporales")
+}
